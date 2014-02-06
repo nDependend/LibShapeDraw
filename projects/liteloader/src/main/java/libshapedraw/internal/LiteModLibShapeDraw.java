@@ -1,6 +1,7 @@
 package libshapedraw.internal;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.io.File;
@@ -213,19 +214,22 @@ public class LiteModLibShapeDraw implements InitCompleteListener, JoinGameListen
                 "installing render hook using profiler proxy, replacing " + origClass);
         LSDUtil.setFinalField(fp, minecraft, proxy);
 
-        // Copy all vanilla-defined field values from the original profiler to
+        // Copy all vanilla-defined non-static field values from the original profiler to
         // the new proxy.
         for (Field f : vanillaClass.getDeclaredFields()) {
-            f.setAccessible(true);
-            Object origValue = LSDUtil.getFieldValue(f, proxy.orig);
-            LSDUtil.setFinalField(f, proxy, origValue);
-            LSDController.getLog().fine("copied profiler field " + f + " = " + String.valueOf(origValue));
-            // "Neuter" the original profiler by changing its vanilla-defined
-            // reference types to new dummy instances.
-            if (f.getType() == List.class) {
-                LSDUtil.setFinalField(f, proxy.orig, new NullList());
-            } else if (f.getType() == Map.class) {
-                LSDUtil.setFinalField(f, proxy.orig, new NullMap());
+            // subclasses already have the original static field values
+            if (!Modifier.isStatic(f.getModifiers())) {
+                f.setAccessible(true);
+                Object origValue = LSDUtil.getFieldValue(f, proxy.orig);
+                LSDUtil.setFinalField(f, proxy, origValue);
+                LSDController.getLog().fine("copied profiler field " + f + " = " + String.valueOf(origValue));
+                // "Neuter" the original profiler by changing its vanilla-defined
+                // reference types to new dummy instances.
+                if (f.getType() == List.class) {
+                    LSDUtil.setFinalField(f, proxy.orig, new NullList());
+                } else if (f.getType() == Map.class) {
+                    LSDUtil.setFinalField(f, proxy.orig, new NullMap());
+                }
             }
         }
 
