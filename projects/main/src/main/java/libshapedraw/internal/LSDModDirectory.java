@@ -1,10 +1,12 @@
 package libshapedraw.internal;
 
 import java.io.File;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
 import libshapedraw.ApiInfo;
 import net.minecraft.client.Minecraft;
+
+import com.google.common.io.Files;
 
 /**
  * Internal class. This is the one exception to the rule that no Minecraft
@@ -33,15 +35,26 @@ public class LSDModDirectory {
      */
     private static File getMinecraftDir() {
         try {
-            Method m;
+            Field f;
             try {
-                m = Minecraft.class.getMethod("b");
-            } catch (NoSuchMethodException e) {
-                m = Minecraft.class.getMethod("getMinecraftDir");
+                f = Minecraft.class.getDeclaredField("w");
+            } catch (NoSuchFieldException e) {
+                f = Minecraft.class.getDeclaredField("mcDataDir");
             }
-            return (File) m.invoke(null);
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc != null) {
+                return (File) f.get(mc);
+            } else {
+                // For the test suite, we return a temporary directory
+                File tempDir = Files.createTempDir();
+                File modsDir = new File(tempDir, "mods");
+                if (!modsDir.exists()) {
+                    modsDir.mkdir();
+                }
+                return tempDir;
+            }
         } catch (Exception e) {
-            throw new LSDInternalReflectionException("unable to invoke Minecraft.getMinecraftDir", e);
+            throw new LSDInternalReflectionException("unable to reflect Minecraft.mcDataDir", e);
         }
     }
 }
