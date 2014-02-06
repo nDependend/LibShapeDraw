@@ -1,0 +1,175 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+//apply from: 'metadata.gradle'
+
+ext {
+	mcpDir = new File(System.properties['user.home'], "Desktop/minecraft/mcp/mcp903/")
+
+}
+
+allprojects  {
+    apply plugin: 'maven'
+
+    group = 'libshapedraw'
+    version = project.property('libshapedraw.version')
+}
+
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+
+    ext.sharedManifest = manifest {
+        attributes('Built-By': 'Gradle', 'Implementation-Title': project.property('libshapedraw.name'), 'Implementation-Vendor': project.property('libshapedraw.authors'), 'Implementation-Version': version)
+    }
+
+    repositories {
+        mavenLocal()
+
+        maven { url "http://repo.maven.apache.org/maven2" }
+    }
+
+
+    dependencies {
+        compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version:'2.9.+'
+        compile group: 'org.lwjgl.lwjgl', name: 'lwjgl_util', version:'2.9.+'
+        testCompile group: 'junit', name: 'junit', version:'4.+'
+        testRuntime group: 'com.google.code.gson', name: 'gson', version: '2.2.+'
+        testRuntime group: 'org.apache.logging.log4j', name:'log4j-api', version:"2.0-beta9"
+        testRuntime group: 'org.apache.logging.log4j', name:'log4j-core', version:"2.0-beta9"
+        compile files("../../lib/minecraft-deobf.jar", "../../lib/BON.jar")
+        compile group: 'com.google.guava', name: 'guava', version:'15.+'
+        testRuntime group: 'io.netty', name: 'netty-all', version: '4.0.+'
+    }
+
+    processResources {
+        doFirst {
+            filter ReplaceTokens, tokens: [
+                "libshapedraw.name": project.property("libshapedraw.name"),
+                "libshapedraw.url.main": project.property("libshapedraw.url.main"),
+                "libshapedraw.url.short": project.property("libshapedraw.url.short"),
+                "libshapedraw.url.source": project.property("libshapedraw.url.source"),
+                "libshapedraw.url.update": project.property("libshapedraw.url.update"),
+                "libshapedraw.updatecheck": project.property("libshapedraw.updatecheck"),
+                "libshapedraw.authors": project.property("libshapedraw.authors"),
+                "libshapedraw.blurb": project.property("libshapedraw.blurb"),
+                "libshapedraw.blurb.demos": project.property("libshapedraw.blurb.demos"),
+                "libshapedraw.version": project.property("libshapedraw.version"),
+                "libshapedraw.revision": project.property("libshapedraw.revision"),
+                "minecraft.version": project.property("minecraft.version"),
+                "liteloader.version": project.property("liteloader.version")
+                ]
+        }
+    }
+
+    ext.platforms = ['windows', 'linux', 'osx']
+    platforms.each { platform ->
+        task "${platform}Natives" {
+            def outputDir = "$buildDir/natives/$platform"
+            inputs.files(configurations.compile)
+            outputs.dir(outputDir)
+            doLast {
+                copy {
+                    def artifacts = configurations.compile.resolvedConfiguration.resolvedArtifacts
+                        .findAll { it.classifier == "natives-$platform" }
+                    artifacts.each { 
+                        from zipTree(it.file)
+                    }            
+                    into outputDir
+                }
+            }
+        }
+    }
+
+    task natives {
+        description "Copies native libraries to an appropriate directory."
+        it.dependsOn platforms.collect { "${it}Natives" }.findAll { tasks[it] }
+    }
+
+    // Unfortunatly the Gradle app plug-in does not allow me to pass in -D options.
+    // LWJGL
+    test { 
+        // System.setProperty('java.library.path' , './build/natives/linux' )
+        // systemProperties = [ 'java.library.path' : './build/natives/linux' ]
+        jvmArgs "-Djava.library.path=./build/natives/linux"
+        it.dependsOn natives
+    }
+
+    task reobfuscate(dependsOn: jar) {
+        // we modify jar properties at runtime per project, so we can't declare outputs at configuration-time
+        outputs.upToDateWhen{ !jar.state.getDidWork() }
+        doLast {
+            def dest = new File(jar.destinationDir, "${jar.baseName}-${version}.${jar.extension}")
+            javaexec {
+                main = 'immibis.bon.cui.MCPRemap'
+                classpath = project.files("../../lib/BON.jar")
+                args = ['-mcp', project.mcpDir.absolutePath,
+                     '-from', 'MCP',
+                     '-to',   'OBF',
+                     '-side', 'UNIVERSAL',
+                     '-ref',  new File(project.mcpDir, 'bin/minecraft').absolutePath,
+                     '-in', jar.archivePath,
+                     '-out', dest ]
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.compilerArgs = ["-Xlint:all"]
+    }
+}
+
+//public class LiteMod extends Jar {
+//  String extension = 'litemod'
+//}
+project(':LibShapeDraw') {
+    configurations {
+        common
+    }
+
+    artifacts {
+        common jar
+    }
+
+    javadoc {
+        enabled = false
+    }
+}
+
+project(':liteloader') {
+    apply plugin: 'application'
+
+    mainClassName = "com.mumfrey.liteloader.debug.Start"
+
+    configurations {
+        liteloader
+    }
+
+    dependencies {
+        compile project(':LibShapeDraw')
+        liteloader project(path: ':LibShapeDraw', configuration: 'common') 
+    }
+
+    jar {
+        from {
+            configurations.liteloader.collect {
+                it.isDirectory() ? it : zipTree(it)
+            }
+        }
+        manifest = project.manifest {
+            from sharedManifest
+        }
+
+        baseName = project.property('libshapedraw.name')
+        extension = 'litemod'
+        classifier = 'dev'
+    }
+
+    javadoc {
+        source += project(':LibShapeDraw').sourceSets.main.allJava
+    }
+
+    tasks.build.dependsOn(reobfuscate)
+}
+
