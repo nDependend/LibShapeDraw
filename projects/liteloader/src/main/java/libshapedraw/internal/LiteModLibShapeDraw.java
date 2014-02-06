@@ -1,10 +1,9 @@
-// THIS SOURCE FILE WAS AUTOMATICALLY GENERATED. DO NOT MANUALLY EDIT.
-// Edit projects/dev/src/main/java/net/minecraft/src/mod_LibShapeDraw.java
-// and then run the projects/dev/src/main/python/obfuscate.py script.
+package libshapedraw.internal;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.io.File;
 
 import libshapedraw.ApiInfo;
 import libshapedraw.MinecraftAccess;
@@ -14,7 +13,20 @@ import libshapedraw.internal.LSDUtil.NullList;
 import libshapedraw.internal.LSDUtil.NullMap;
 import libshapedraw.primitive.ReadonlyVector3;
 import libshapedraw.primitive.Vector3;
+
+import com.mumfrey.liteloader.InitCompleteListener;
+import com.mumfrey.liteloader.JoinGameListener;
+import com.mumfrey.liteloader.core.LiteLoader;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Timer;
+import net.minecraft.profiler.Profiler;
+import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.play.server.S01PacketJoinGame;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.util.ChatComponentText;
 
 /**
  * Internal class. Mods using the LibShapeDraw API can safely ignore this.
@@ -30,7 +42,7 @@ import net.minecraft.client.Minecraft;
  * this class, making the LibShapeDraw API itself clean and free of obfuscated
  * code. (There is a single exception: LSDModDirectory.getMinecraftDir.)
  */
-public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
+public class LiteModLibShapeDraw implements InitCompleteListener, JoinGameListener, MinecraftAccess {
     /**
      * Install our render hook by inserting a proxy for Minecraft.mcProfiler.
      * <p>
@@ -82,66 +94,67 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
      * The sooner the better.
      */
     // obf: Profiler
-    public class Proxy extends kh {
+    public class Proxy extends Profiler {
         /**
          * Keep a reference to the old Profiler if we detect that another mod
          * is also proxying it. Play nice with others!
          */
         // obf: Profiler
-        protected kh orig;
+        protected Profiler orig;
 
         @Override
         // obf: Profiler.startSection
-        public void a(String sectionName) {
+        public void startSection(String sectionName) {
             // obf: Profiler.startSection
-            super.a(sectionName);
+            super.startSection(sectionName);
             if (orig != null) {
                 // obf: Profiler.startSection
-                orig.a(sectionName);
+                orig.startSection(sectionName);
             }
         }
 
         @Override
         // obf: Profiler.endSection
-        public void b() {
+        public void endSection() {
             // obf: Profiler.endSection
-            super.b();
+            super.endSection();
             if (orig != null) {
                 // obf: Profiler.endSection
-                orig.b();
+                orig.endSection();
             }
         }
 
         @Override
         // obf: Profiler.endStartSection
-        public void c(String sectionName) {
+        public void endStartSection(String sectionName) {
             if (sectionName.equals("hand")) {
                 // obf: Profiler.endStartSection
-                super.c("LibShapeDraw"); // we'll take the blame :-)
+                super.endStartSection("LibShapeDraw"); // we'll take the blame :-)
                 render();
             }
             // obf: Profiler.endStartSection
-            super.c(sectionName);
+            super.endStartSection(sectionName);
             if (orig != null) {
                 // obf: Profiler.endStartSection
-                orig.c(sectionName);
+                orig.endStartSection(sectionName);
             }
         }
     }
 
+    // obf: Minecraft
     private Minecraft minecraft;
     // obf: Timer
-    private asr timer;
+    private Timer timer;
     private Proxy proxy;
     private LSDController controller;
     private boolean renderHeartbeat;
     private boolean renderHeartbroken;
     private Object curWorld;
     // obf: EntityClientPlayerMP
-    private ayk curPlayer;
+    private EntityClientPlayerMP curPlayer;
     private Integer curDimension;
 
-    public mod_LibShapeDraw() {
+    public LiteModLibShapeDraw() {
         controller = LSDController.getInstance();
         controller.initialize(this);
     }
@@ -157,31 +170,28 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     }
 
     @Override
-    public String getPriorities() {
-        // Request that this mod gets loaded last. Ideally, we want to be the
-        // last mod to potentially modify Minecraft.mcProfiler.
-        return "after:*";
+    public void init(File configPath) {
+        // Do nothing; wait until onInitCompleted.
     }
 
     @Override
-    public void load() {
-        // Do nothing; wait until modsLoaded.
+    public void upgradeSettings(String version, File configPath, File oldConfigPath) {
+        //
     }
 
     @Override
-    public void modsLoaded() {
-        // obf: Minecraft.getMinecraft
-        minecraft = Minecraft.x();
+    // obf: Minecraft
+    public void onInitCompleted(Minecraft minecraft, LiteLoader loader) {
+        this.minecraft = minecraft;
         // Get a reference to Minecraft's timer so we can get the partial
         // tick time for rendering (it's not passed to the profiler directly).
         // 
         // There's only one Timer field declared by Minecraft so it's safe to
         // look it up by type.
-        // obf: Timer
-        timer = (asr) LSDUtil.getFieldValue(LSDUtil.getFieldByType(Minecraft.class, asr.class, 0), minecraft);
+        // obf: Minecraft, Timer
+        timer = (Timer) LSDUtil.getFieldValue(LSDUtil.getFieldByType(Minecraft.class, Timer.class, 0), minecraft);
 
         installRenderHook();
-        ModLoader.setInGameHook(this, true, true); // game ticks only, not every render frame.
         LSDController.getLog().info(getClass().getName() + " loaded");
     }
 
@@ -194,9 +204,10 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
         proxy = new Proxy();
         // There's only one Profiler field declared by Minecraft so it's safe
         // to look it up by type.
+        // obf: Minecraft
         final Field fp = LSDUtil.getFieldByType(Minecraft.class, vanillaClass, 0);
         // obf: Profiler
-        proxy.orig = (kh) LSDUtil.getFieldValue(fp, minecraft);
+        proxy.orig = (Profiler) LSDUtil.getFieldValue(fp, minecraft);
         final String origClass = proxy.orig.getClass().getName();
         LSDController.getLog().info(
                 "installing render hook using profiler proxy, replacing " + origClass);
@@ -236,8 +247,8 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     }
 
     @Override
-    // obf: NetClientHandler
-    public void clientConnect(axz netClientHandler) {
+    // obf: INetHandler, S01PacketJoinGame
+    public void onJoinGame(INetHandler netHandler, S01PacketJoinGame joinGamePacket) {
         LSDController.getLog().info(getClass().getName() + " new server connection");
         curWorld = null;
         curPlayer = null;
@@ -245,56 +256,59 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     }
 
     @Override
-    public boolean onTickInGame(float partialTick, Minecraft minecraft) {
-        ReadonlyVector3 playerCoords = getPlayerCoords();
+    // obf: Minecraft
+    public void onTick(Minecraft minecraft, float partialTicks, boolean inGame, boolean clock) {
+        // game ticks only, not every render frame.
+        if (inGame && clock) {
+            ReadonlyVector3 playerCoords = getPlayerCoords();
 
-        // obf: Minecraft.theWorld, Minecraft.thePlayer
-        if (curWorld != minecraft.e || curPlayer != minecraft.g) {
-            // obf: Minecraft.theWorld
-            curWorld = minecraft.e;
-            // obf: Minecraft.thePlayer
-            curPlayer = minecraft.g; 
+            // obf: Minecraft.theWorld, Minecraft.thePlayer
+            if (curWorld != minecraft.theWorld || curPlayer != minecraft.thePlayer) {
+                // obf: Minecraft.theWorld
+                curWorld = minecraft.theWorld;
+                // obf: Minecraft.thePlayer
+                curPlayer = minecraft.thePlayer;
 
-            // Dispatch respawn event to Controller.
-            // obf: Entity.dimension
-            int newDimension = curPlayer.ap;
-            controller.respawn(playerCoords,
-                    curDimension == null,
-                    curDimension == null || curDimension != newDimension);
-            curDimension = newDimension;
+                // Dispatch respawn event to Controller.
+                // obf: Entity.dimension
+                int newDimension = curPlayer.dimension;
+                controller.respawn(playerCoords,
+                        curDimension == null,
+                        curDimension == null || curDimension != newDimension);
+                curDimension = newDimension;
+            }
+
+            // Dispatch game tick event to Controller.
+            controller.gameTick(playerCoords);
+
+            // Make sure our render hook is still working.
+            // obf: Minecraft.skipRenderWorld
+            if (!renderHeartbeat && !renderHeartbroken && !minecraft.skipRenderWorld) {
+                // Despite our best efforts when installing the profiler proxy,
+                // some other mod probably overwrote our hook without providing a
+                // compatibility layer like we do. :-(
+                //
+                // Attempting to reinstall our hook would be futile: chances are it
+                // would simply be overwritten again by the next tick. Rather than
+                // participating in an inter-mod slap fight, back down and log an
+                // error message. No need to crash Minecraft.
+                Object newProxy = LSDUtil.getFieldValue(
+                        // obf: Minecraft
+                        LSDUtil.getFieldByType(Minecraft.class, Proxy.class.getSuperclass(), 0), minecraft);
+                String message = "mod incompatibility detected: render hook not working! Minecraft.mcProfiler is " +
+                        (newProxy == null ? "null" : newProxy.getClass().getName());
+                LSDController.getLog().warning(message);
+                sendChatMessage("\u00a7c[" + getName() + "] " + message);
+                renderHeartbroken = true; // don't spam log
+            }
+            renderHeartbeat = false;
         }
-
-        // Dispatch game tick event to Controller.
-        controller.gameTick(playerCoords);
-
-        // Make sure our render hook is still working.
-        // obf: Minecraft.skipRenderWorld
-        if (!renderHeartbeat && !renderHeartbroken && !minecraft.w) {
-            // Despite our best efforts when installing the profiler proxy,
-            // some other mod probably overwrote our hook without providing a
-            // compatibility layer like we do. :-(
-            // 
-            // Attempting to reinstall our hook would be futile: chances are it
-            // would simply be overwritten again by the next tick. Rather than
-            // participating in an inter-mod slap fight, back down and log an
-            // error message. No need to crash Minecraft.
-            Object newProxy = LSDUtil.getFieldValue(
-                    LSDUtil.getFieldByType(Minecraft.class, Proxy.class.getSuperclass(), 0), minecraft);
-            String message = "mod incompatibility detected: render hook not working! Minecraft.mcProfiler is " +
-                    (newProxy == null ? "null" : newProxy.getClass().getName());
-            LSDController.getLog().warning(message);
-            sendChatMessage("\u00a7c[" + getName() + "] " + message);
-            renderHeartbroken = true; // don't spam log
-        }
-        renderHeartbeat = false;
-
-        return true;
     }
 
     /** Dispatch render event to Controller. */
     protected void render() {
         // obf: Minecraft.gameSettings, GameSettings.hideGUI, Minecraft.currentScreen
-        controller.render(getPlayerCoords(), minecraft.y.S && minecraft.r == null);
+        controller.render(getPlayerCoords(), minecraft.gameSettings.hideGUI && minecraft.currentScreen == null);
         renderHeartbeat = true;
     }
 
@@ -309,11 +323,11 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
         float partialTick = getPartialTick();
         return new Vector3(
                 // obf: Entity.prevPosX, Entity.posX
-                curPlayer.q + partialTick*(curPlayer.t - curPlayer.q),
+                curPlayer.prevPosX + partialTick*(curPlayer.posX - curPlayer.prevPosX),
                 // obf: Entity.prevPosY, Entity.posY
-                curPlayer.r + partialTick*(curPlayer.u - curPlayer.r),
+                curPlayer.prevPosY + partialTick*(curPlayer.posY - curPlayer.prevPosY),
                 // obf: Entity.prevPosZ, Entity.posZ
-                curPlayer.s + partialTick*(curPlayer.v - curPlayer.s));
+                curPlayer.prevPosZ + partialTick*(curPlayer.posZ - curPlayer.prevPosZ));
     }
 
     // ====
@@ -323,35 +337,35 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     @Override
     public MinecraftAccess startDrawing(int mode) {
         // obf: Tessellator, Tessellator.instance, Tessellator.startDrawing
-        bao.a.b(mode);
+        Tessellator.instance.startDrawing(mode);
         return this;
     }
 
     @Override
     public MinecraftAccess addVertex(double x, double y, double z) {
         // obf: Tessellator, Tessellator.instance, Tessellator.addVertex
-        bao.a.a(x, y, z);
+        Tessellator.instance.addVertex(x, y, z);
         return this;
     }
 
     @Override
     public MinecraftAccess addVertex(ReadonlyVector3 coords) {
         // obf: Tessellator, Tessellator.instance, Tessellator.addVertex
-        bao.a.a(coords.getX(), coords.getY(), coords.getZ());
+        Tessellator.instance.addVertex(coords.getX(), coords.getY(), coords.getZ());
         return this;
     }
 
     @Override
     public MinecraftAccess finishDrawing() {
         // obf: Tessellator, Tessellator.instance, Tessellator.draw
-        bao.a.a();
+        Tessellator.instance.draw();
         return this;
     }
 
     @Override
     public MinecraftAccess enableStandardItemLighting() {
         // obf: RenderHelper, RenderHelper.enableStandardItemLighting
-        aro.b();
+        RenderHelper.enableStandardItemLighting();
         return this;
     }
 
@@ -360,8 +374,8 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
         boolean visible = chatWindowExists();
         LSDController.getLog().info("sendChatMessage visible=" + visible + " message=" + message);
         if (visible) {
-            // obf: Minecraft.ingameGUI, GuiIngame.getChatGUI, GuiNewChat.printChatMessage
-            minecraft.v.b().a(message);
+            // obf: Minecraft.ingameGUI, GuiIngame.getChatGUI, GuiNewChat.printChatMessage, ChatComponentText
+            minecraft.ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(message));
         }
         return this;
     }
@@ -369,13 +383,13 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     @Override
     public boolean chatWindowExists() {
         // obf: Minecraft.ingameGUI, GuiIngame.getChatGUI
-        return minecraft != null && minecraft.v != null && minecraft.v.b() != null;
+        return minecraft != null && minecraft.ingameGUI != null && minecraft.ingameGUI.getChatGUI() != null;
     }
 
     @Override
     public float getPartialTick() {
         // obf: Timer.renderPartialTicks
-        return timer == null ? 0.0F : timer.c;
+        return timer == null ? 0.0F : timer.renderPartialTicks;
     }
 
 
@@ -383,7 +397,7 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     public MinecraftAccess profilerStartSection(String sectionName) {
         if (proxy != null) {
             // obf: Profiler.startSection
-            proxy.a(sectionName);
+            proxy.startSection(sectionName);
         }
         return this;
     }
@@ -392,7 +406,7 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     public MinecraftAccess profilerEndSection() {
         if (proxy != null) {
             // obf: Profiler.endSection
-            proxy.b();
+            proxy.endSection();
         }
         return this;
     }
@@ -401,7 +415,7 @@ public class mod_LibShapeDraw extends BaseMod implements MinecraftAccess {
     public MinecraftAccess profilerEndStartSection(String sectionName) {
         if (proxy != null) {
             // obf: Profiler.endStartSection
-            proxy.c(sectionName);
+            proxy.endStartSection(sectionName);
         }
         return this;
     }
