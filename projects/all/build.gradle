@@ -157,7 +157,7 @@ project(':liteloader') {
                 it.isDirectory() ? it : zipTree(it)
             }
         }
-        manifest = project.manifest {
+        manifest {
             from sharedManifest
         }
 
@@ -173,3 +173,29 @@ project(':liteloader') {
     tasks.build.dependsOn(reobfuscate)
 }
 
+project(':demos') {
+    dependencies {
+        compile project(':LibShapeDraw')
+    }
+
+    jar {
+        baseName = project.property('libshapedraw.name') + "Demos"
+
+        manifest {
+            attributes('Implementation-Title': baseName)
+            from(sharedManifest) {
+                eachEntry { details ->
+                    // preserve already defined entries
+                    if (details.baseValue != details.mergeValue && details.key == 'Implementation-Title') {
+                        details.value = baseValue
+                    }
+                }
+            }
+        }
+
+        extension = 'litemod'
+        classifier = 'dev'
+    }
+
+    tasks.build.dependsOn(reobfuscate)
+}

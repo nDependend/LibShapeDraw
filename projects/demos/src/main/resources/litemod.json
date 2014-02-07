@@ -1,0 +1,8 @@
+{
+	"name": "@libshapedraw.name@Demos",
+	"mcversion": "@liteloader.version@",
+	"version": "@libshapedraw.version@",
+	"revision": "@libshapedraw.revision@",
+	"author": "@libshapedraw.authors@",
+	"description": "@libshapedraw.blurb.demos@"
+}
