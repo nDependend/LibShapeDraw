@@ -111,6 +111,15 @@ subprojects {
                      '-in', jar.archivePath,
                      '-out', dest ]
             }
+
+            // Copy the manifest file
+            if (dest.exists() && dest.canRead()) {
+                ant.zip(destfile: dest, update: true) {
+                    zipfileset(src: jar.archivePath) {
+                        include(name: 'META-INF/*')
+                    }
+                }
+            }
         }
     }
 
