@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 //apply from: 'metadata.gradle'
 
 ext {
-	mcpDir = new File(System.properties['user.home'], 'Desktop/minecraft/mcp/mcp903/')
+	mcpDir = new File(System.properties['user.home'], 'Desktop/minecraft/mcp/mcp908/')
 }
 
 allprojects  {

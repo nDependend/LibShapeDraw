@@ -204,6 +204,6 @@ public class LiteModLibShapeDrawDemos implements Tickable, LSDEventListener {
 
     public void drawText(String message, int x, int y, int argb) {
         // obf: Minecraft.fontRenderer, FontRenderer.drawStringWithShadow
-        minecraft.fontRenderer.drawStringWithShadow(message, x, y, argb);
+        minecraft.fontRendererObj.drawStringWithShadow(message, x, y, argb);
     }
 }
