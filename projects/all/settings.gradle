@@ -1,8 +1,10 @@
 rootProject.name = 'LibShapeDraw-master'
 include ':LibShapeDraw'
 include ':liteloader'
+include ':forge'
 include ':demos'
 
 project(':LibShapeDraw').projectDir = "$rootDir/../main" as File
 project(':liteloader').projectDir = "$rootDir/../liteloader" as File
+project(':forge').projectDir = "$rootDir/../forge" as File
 project(':demos').projectDir = "$rootDir/../demos" as File

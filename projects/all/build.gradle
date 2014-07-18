@@ -182,6 +182,39 @@ project(':liteloader') {
     tasks.build.dependsOn(reobfuscate)
 }
 
+project(':forge') {
+    configurations {
+        forge
+    }
+
+    dependencies {
+        compile files('../../lib/forgemcpbin.jar')
+        compile project(':LibShapeDraw')
+        forge project(path: ':LibShapeDraw', configuration: 'common')
+    }
+
+    jar {
+        from {
+            configurations.forge.collect {
+                it.isDirectory() ? it : zipTree(it)
+            }
+        }
+        manifest {
+            from sharedManifest
+        }
+
+        baseName = project.property('libshapedraw.name')
+        extension = 'jar'
+        classifier = 'dev'
+    }
+
+    javadoc {
+        source += project(':LibShapeDraw').sourceSets.main.allJava
+    }
+
+    tasks.build.dependsOn(reobfuscate)
+}
+
 project(':demos') {
     dependencies {
         compile project(':LibShapeDraw')
