@@ -17,6 +17,10 @@ import libshapedraw.internal.LSDUtil.NullLogger;
 import libshapedraw.primitive.ReadonlyVector3;
 import libshapedraw.shape.Shape;
 
+import net.minecraft.launchwrapper.Launch;
+
+import com.google.common.base.Throwables;
+
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -55,7 +59,15 @@ public class LSDController {
 
     public static LSDController getInstance() {
         if (instance == null) {
-            instance = new LSDController();
+            try {
+
+                // Load with LaunchClassLoader (Mojang) instead of ModClassLoader (FML's default)
+                // This allows inter-loader interoperability
+                ClassLoader classLoader = Launch.classLoader;
+                instance = (LSDController) Class.forName("libshapedraw.internal.LSDController", true, classLoader).newInstance();
+            } catch (Exception ex) {
+                Throwables.propagate(ex);
+            }
         }
         return instance;
     }

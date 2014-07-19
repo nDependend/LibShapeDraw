@@ -23,9 +23,13 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
-
-        maven { url "http://repo.maven.apache.org/maven2" }
+        maven {
+            url "http://repo.maven.apache.org/maven2"
+        }
+        maven {
+            name = "mojang"
+            url = "https://libraries.minecraft.net/"
+        }
     }
 
 
@@ -36,6 +40,7 @@ subprojects {
         testRuntime group: 'com.google.code.gson', name: 'gson', version: '2.2.+'
         testRuntime group: 'org.apache.logging.log4j', name:'log4j-api', version:"2.0-beta9"
         testRuntime group: 'org.apache.logging.log4j', name:'log4j-core', version:"2.0-beta9"
+        compile group: 'net.minecraft', name: 'launchwrapper', version:'1.9'
         compile files('../../lib/BON.jar')
         compile files(new File(mcpDir, "bin/minecraft"))
         compile group: 'com.google.guava', name: 'guava', version:'15.+'
