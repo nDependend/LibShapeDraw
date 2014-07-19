@@ -39,7 +39,11 @@ public class LSDModDirectory {
             try {
                 f = Minecraft.class.getDeclaredField("w");
             } catch (NoSuchFieldException e) {
-                f = Minecraft.class.getDeclaredField("mcDataDir");
+                try {
+                    f = Minecraft.class.getDeclaredField("field_71412_D");
+                } catch (NoSuchFieldException e2) {
+                    f = Minecraft.class.getDeclaredField("mcDataDir");
+                }
             }
             Minecraft mc = Minecraft.getMinecraft();
             if (mc != null) {
