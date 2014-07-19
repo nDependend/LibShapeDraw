@@ -22,9 +22,16 @@ import net.minecraft.network.play.server.S01PacketJoinGame;
  * {@link libshapedraw.internal.bootstrap.LSDBootstrapBase}). 
  */
 public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitCompleteListener, JoinGameListener {
+
+    private boolean isDelegate = false;
+
     public LiteModLibShapeDraw() {
         controller = LSDController.getInstance();
-        controller.initialize(this);
+        if (!controller.isInitialized())
+        {
+            controller.initialize(this);
+            isDelegate = true;
+        }
     }
 
     @Override
@@ -39,19 +46,25 @@ public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitComplet
 
     @Override
     public void onInitCompleted(Minecraft minecraft, LiteLoader loader) {
-        onPostInitBootstrap(minecraft);
+        if (isDelegate) {
+            onPostInitBootstrap(minecraft);
+        }
     }
 
     @Override
     public void onJoinGame(INetHandler netHandler, S01PacketJoinGame joinGamePacket) {
-        onJoinGameBootstrap();
+        if (isDelegate) {
+            onJoinGameBootstrap();
+        }
     }
 
     @Override
     public void onTick(Minecraft minecraft, float partialTicks, boolean inGame, boolean clock) {
-        // game ticks only, not every render frame.
-        if (inGame && clock) {
-            onTickBootstrap();
+        if (isDelegate) {
+            // game ticks only, not every render frame.
+            if (inGame && clock) {
+                onTickBootstrap();
+            }
         }
     }
 }
