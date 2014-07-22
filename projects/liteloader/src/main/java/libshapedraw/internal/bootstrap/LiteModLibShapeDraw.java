@@ -61,9 +61,13 @@ public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitComplet
     @Override
     public void onTick(Minecraft minecraft, float partialTicks, boolean inGame, boolean clock) {
         if (isDelegate) {
-            // game ticks only, not every render frame.
-            if (inGame && clock) {
-                onTickBootstrap();
+            if (inGame) {
+                // game ticks only, not every render frame.
+                for (int i = 0; i < timer.elapsedTicks; i++) {
+                    onGameTickBootstrap();
+                }
+
+                checkRenderHook();
             }
         }
     }

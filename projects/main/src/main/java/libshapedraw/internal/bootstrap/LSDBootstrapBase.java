@@ -138,7 +138,7 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
     // obf: Minecraft
     private Minecraft minecraft;
     // obf: Timer
-    private Timer timer;
+    protected Timer timer;
     private Proxy proxy;
     protected LSDController controller;
     private boolean renderHeartbeat;
@@ -234,8 +234,7 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
         curDimension = null;
     }
 
-    // obf: Minecraft
-    protected void onTickBootstrap() {
+    protected void onGameTickBootstrap() {
         // game ticks only, not every render frame.
         ReadonlyVector3 playerCoords = getPlayerCoords();
 
@@ -257,8 +256,10 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
 
         // Dispatch game tick event to Controller.
         controller.gameTick(playerCoords);
+    }
 
-        // Make sure our render hook is still working.
+    /** Make sure our render hook is still working. */
+    protected void checkRenderHook() {
         // obf: Minecraft.skipRenderWorld
         if (!renderHeartbeat && !renderHeartbroken && !minecraft.skipRenderWorld) {
             // Despite our best efforts when installing the profiler proxy,
