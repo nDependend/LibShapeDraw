@@ -23,17 +23,6 @@ import net.minecraft.network.play.server.S01PacketJoinGame;
  */
 public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitCompleteListener, JoinGameListener {
 
-    private boolean isDelegate = false;
-
-    public LiteModLibShapeDraw() {
-        controller = LSDController.getInstance();
-        if (!controller.isInitialized())
-        {
-            controller.initialize(this);
-            isDelegate = true;
-        }
-    }
-
     @Override
     public void init(File configPath) {
         // Do nothing; wait until onInitCompleted.

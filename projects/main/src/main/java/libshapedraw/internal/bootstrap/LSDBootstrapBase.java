@@ -1,5 +1,6 @@
 package libshapedraw.internal.bootstrap;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -21,6 +22,10 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ChatComponentText;
+
+import net.minecraft.launchwrapper.Launch;
+
+import com.google.common.base.Throwables;
 
 /**
  * Internal class. Mods using the LibShapeDraw API can safely ignore this.
@@ -140,13 +145,33 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
     // obf: Timer
     protected Timer timer;
     private Proxy proxy;
-    protected LSDController controller;
+    private LSDController controller;
     private boolean renderHeartbeat;
     private boolean renderHeartbroken;
     private Object curWorld;
     // obf: EntityClientPlayerMP
     private EntityClientPlayerMP curPlayer;
     private Integer curDimension;
+
+    protected boolean isDelegate = false;
+
+    public LSDBootstrapBase() {
+        try {
+            // invoke the static getInstance method with LaunchClassLoader
+            ClassLoader classLoader = Launch.classLoader;
+            Class clazz = Class.forName("libshapedraw.internal.LSDController", false, classLoader);
+            Method controllerInstantiator = clazz.getMethod("getInstance");
+            controller = (LSDController) controllerInstantiator.invoke(null);
+        } catch (Exception ex) {
+            Throwables.propagate(ex);
+        }
+
+        // whichever loader initialized the controller first is the delegate
+        if (!controller.isInitialized()) {
+            controller.initialize(this);
+            isDelegate = true;
+        }
+    }
 
     // getName/getVersion is needed by LiteLoader, but not by FML
     public String getName() {
