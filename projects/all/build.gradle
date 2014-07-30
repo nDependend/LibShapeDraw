@@ -9,7 +9,7 @@ ext {
 allprojects  {
     apply plugin: 'maven'
 
-    group = 'libshapedraw'
+    group = project.property('libshapedraw.name').toLowerCase()
     version = project.property('libshapedraw.version')
 }
 
@@ -137,92 +137,88 @@ subprojects {
 //public class LiteMod extends Jar {
 //  String extension = 'litemod'
 //}
-project(':LibShapeDraw') {
-    configurations {
-        common
-    }
+[':liteloader', ':forge'].each { projectName ->
+    project(projectName) {
+        configurations {
+            bootstrap
+        }
 
-    artifacts {
-        common jar
-    }
+        dependencies {
+            compile project(path: ':LibShapeDraw', configuration: 'common')
+            bootstrap project(path: ':LibShapeDraw', configuration: 'common')
+        }
 
-    javadoc {
-        enabled = false
+        jar {
+            from {
+                configurations.bootstrap.collect {
+                    it.isDirectory() ? it : zipTree(it)
+                }
+            }
+            manifest {
+                from sharedManifest
+            }
+
+            baseName = project.property('libshapedraw.name')
+            classifier = 'dev'
+        }
+
+        javadoc {
+            enabled = false
+        }
+
+        tasks.build.dependsOn(reobfuscate)
     }
 }
 
 project(':liteloader') {
-    apply plugin: 'application'
-
-    mainClassName = "com.mumfrey.liteloader.debug.Start"
-
-    configurations {
-        liteloader
-    }
-
-    dependencies {
-        compile project(':LibShapeDraw')
-        liteloader project(path: ':LibShapeDraw', configuration: 'common') 
-    }
-
     jar {
-        from {
-            configurations.liteloader.collect {
-                it.isDirectory() ? it : zipTree(it)
-            }
-        }
-        manifest {
-            from sharedManifest
-        }
-
-        baseName = project.property('libshapedraw.name')
         extension = 'litemod'
-        classifier = 'dev'
     }
-
-    javadoc {
-        source += project(':LibShapeDraw').sourceSets.main.allJava
-    }
-
-    tasks.build.dependsOn(reobfuscate)
 }
 
 project(':forge') {
-    configurations {
-        forge
+    def filteredSourceDir = file("${buildDir}/filtered")
+
+    sourceSets {
+    // This source set will contain all sources that we filter
+        filtered {
+            java {
+                srcDirs = [filteredSourceDir]
+            }
+        }
     }
+
+    // tell the compileJava task to compile the filtered source
+    compileJava.source = sourceSets.filtered.java
+
+    // copy the main sources and filter any '$version' occurences.
+    task processSources(type: Copy) {
+        from sourceSets.main.java
+        into filteredSourceDir
+        doFirst {
+            filter ReplaceTokens, tokens: [
+                "libshapedraw.name": project.property("libshapedraw.name"),
+                "libshapedraw.version": project.property("libshapedraw.version"),
+            ]
+        }
+    }
+
+    compileJava.dependsOn processSources
+
+    // ---
 
     dependencies {
         compile files('../../lib/forgemcpbin.jar')
-        compile project(':LibShapeDraw')
-        forge project(path: ':LibShapeDraw', configuration: 'common')
     }
 
     jar {
-        from {
-            configurations.forge.collect {
-                it.isDirectory() ? it : zipTree(it)
-            }
-        }
-        manifest {
-            from sharedManifest
-        }
-
-        baseName = project.property('libshapedraw.name')
         extension = 'jar'
-        classifier = 'dev'
     }
-
-    javadoc {
-        source += project(':LibShapeDraw').sourceSets.main.allJava
-    }
-
-    tasks.build.dependsOn(reobfuscate)
 }
 
 project(':demos') {
     dependencies {
-        compile project(':LibShapeDraw')
+        compile project(path: ':LibShapeDraw', configuration: 'common')
     }
 
     jar {
@@ -242,6 +238,48 @@ project(':demos') {
 
         extension = 'litemod'
         classifier = 'dev'
+    }
+
+    tasks.build.dependsOn(reobfuscate)
+}
+
+project(':LibShapeDraw') {
+    configurations {
+        common
+    }
+
+    // deobfuscated/dev jar sans bootstrappers
+    task libraryJar(type: Jar) {
+        from sourceSets.main.output
+        classifier = 'lib'
+    }
+
+    // deobfuscated/dev jar with bootstrappers
+    def bootstrapProjects = [':liteloader', ':forge']
+    jar {
+        from files(bootstrapProjects.collect {
+            project(it).sourceSets.main.output
+        })
+
+        manifest {
+            from sharedManifest
+        }
+
+        baseName = project.property('libshapedraw.name')
+        classifier = 'dev'
+    }
+
+    jar.dependsOn bootstrapProjects.collect {
+        it + ':classes'
+    }
+
+    javadoc {
+        source project(':liteloader').sourceSets.main.allJava
+        source project(':forge').sourceSets.filtered.allJava
+    }
+
+    artifacts {
+        common libraryJar
     }
 
     tasks.build.dependsOn(reobfuscate)
