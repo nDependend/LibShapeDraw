@@ -170,6 +170,9 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
         if (!controller.isInitialized()) {
             controller.initialize(this);
             isDelegate = true;
+            LSDController.getLog().info(getClass().getName() + " registered itself as the events delegate");
+        } else {
+            LSDController.getLog().info("could not register " + getClass().getName() + " as the events delegate since the controller was already initialized");
         }
     }
 
