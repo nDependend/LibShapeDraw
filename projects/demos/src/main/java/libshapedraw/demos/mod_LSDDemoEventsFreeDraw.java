@@ -31,7 +31,7 @@ public class mod_LSDDemoEventsFreeDraw extends BaseMod implements LSDEventListen
     }
 
     @Override
-    public void load() {
+    public void init() {
         new LibShapeDraw().verifyInitialized().addEventListener(this);
     }
 

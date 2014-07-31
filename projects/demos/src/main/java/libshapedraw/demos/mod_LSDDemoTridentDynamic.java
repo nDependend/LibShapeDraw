@@ -58,7 +58,7 @@ public class mod_LSDDemoTridentDynamic extends BaseMod implements LSDEventListen
     }
 
     @Override
-    public void load() {
+    public void init() {
         libShapeDraw.verifyInitialized();
     }
 

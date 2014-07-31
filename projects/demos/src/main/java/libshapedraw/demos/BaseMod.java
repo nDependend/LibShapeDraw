@@ -1,9 +1,9 @@
 package libshapedraw.demos;
 
 /**
- * Need to define a fake ModLoader BaseMod since we're not in the root package.
+ * Need to define a fake LiteLoader 'BaseMod' so that LiteLoader does not discover it.
  */
 public abstract class BaseMod {
     public abstract String getVersion();
-    public abstract void load();
+    public abstract void init();
 }

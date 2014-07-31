@@ -95,7 +95,7 @@ public class LSDController {
     public void initialize(MinecraftAccess minecraftAccess) {
         if (isInitialized()) {
             // LibShapeDraw is probably installed incorrectly, causing
-            // ModLoader/Forge to bogusly instantiate mod_LibShapeDraw multiple
+            // LiteLoader/Forge to bogusly instantiate mod_LibShapeDraw multiple
             // times.
             throw new IllegalStateException("multiple initializations of controller");
         }

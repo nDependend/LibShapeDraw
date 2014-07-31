@@ -34,7 +34,7 @@ public class mod_LSDDemoTridentTimeline extends BaseMod {
     }
 
     @Override
-    public void load() {
+    public void init() {
         libShapeDraw.verifyInitialized();
 
         // Set up a wireframe cone pointing downward

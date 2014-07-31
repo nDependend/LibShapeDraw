@@ -76,11 +76,11 @@ public class LibShapeDraw {
     /**
      * @return true if the backend controller is all set up.
      *     If false, the cause is likely one of:
-     *     a) ModLoader or Forge is disabled/missing;
+     *     a) LiteLoader or Forge is disabled/missing;
      *     b) mod_LibShapeDraw is disabled/missing; or
-     *     c) ModLoader hasn't instantiated mod_LibShapeDraw yet
+     *     c) LiteLoader hasn't instantiated mod_LibShapeDraw yet
      *        because it's too early in the mod lifecycle.
-     *        Wait until the load method or later.
+     *        Wait until the init stage or later.
      * 
      * @deprecated use {@link #verifyInitialized}
      */
@@ -89,26 +89,26 @@ public class LibShapeDraw {
     }
 
     /**
-     * Optional sanity check for mods to make sure that ModLoader or Forge has
+     * Optional sanity check for mods to make sure that LiteLoader or Forge has
      * successfully initialized LibShapeDraw. Throws an exception if not.
      * <p>
      * This is the only LibShapeDraw API method that has a restriction on when
-     * you can call it. Always wait until at least the BaseMod.load method.
+     * you can call it. Always wait until at least the initialization stage.
      * <p>
      * In other words, do not call verifyInitialized() from your mod's
      * constructor. If you do, the exception may be thrown depending on the
-     * order that ModLoader or Forge chooses to instantiate the various mod
+     * order that LiteLoader or Forge chooses to instantiate the various mod
      * classes.
      */
     public LibShapeDraw verifyInitialized() {
         // This method can't be automatically called from the constructor
         // because it is valid for client code to create LibShapeDraw instances
-        // at any point... even before ModLoader/Forge has had a chance to
+        // at any point... even before LiteLoader/Forge has had a chance to
         // instantiated mod_LibShapeDraw.
         if (!LSDController.isInitialized()) {
             throw new LSDInternalException(ApiInfo.getName() +
                     " is not initialized. Possible causes:" +
-                    " a) ModLoader or Forge is disabled/missing;" +
+                    " a) LiteLoader or Forge is disabled/missing;" +
                     " b) mod_LibShapeDraw is disabled/missing; or" +
                     " c) another mod is incorrectly calling verifyInitialized too early.");
         }

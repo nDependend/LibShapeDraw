@@ -21,7 +21,7 @@ public class mod_LSDDemoBasic extends BaseMod {
     }
 
     @Override
-    public void load() {
+    public void init() {
         // We could have just as easily set up the API in the constructor
         // instead; LibShapeDraw is designed to be as flexible as possible.
         libShapeDraw = new LibShapeDraw();

@@ -35,10 +35,10 @@ public class mod_LSDDemoTridentBasic extends BaseMod {
     }
 
     @Override
-    public void load() {
+    public void init() {
         libShapeDraw.verifyInitialized();
         // The Shapes will be created and their animations will start as soon
-        // as ModLoader loads this mod. That means the Shapes are getting
+        // as LiteLoader loads this mod. That means the Shapes are getting
         // updated even if we're on the main menu or on a loading screen.
         // 
         // This is a relatively harmless waste of a few CPU cycles. Trident

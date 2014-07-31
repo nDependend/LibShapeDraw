@@ -37,7 +37,7 @@ public class mod_LSDDemoEvents extends BaseMod implements LSDEventListener {
     }
 
     @Override
-    public void load() {
+    public void init() {
         // We actually don't have to keep a reference to the LibShapeDraw API
         // instance as it's also accessible in the handler methods via
         // event.getAPI().

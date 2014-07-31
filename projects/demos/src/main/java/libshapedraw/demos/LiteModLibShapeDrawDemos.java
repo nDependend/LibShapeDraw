@@ -19,9 +19,9 @@ import org.lwjgl.input.Keyboard;
 import com.mumfrey.liteloader.Tickable;
 
 /**
- * Quick-and-dirty ModLoader mod that loads demos that the user selects.
+ * Quick-and-dirty LiteLoader mod that loads demos that the user selects.
  * <p>
- * The demos themselves are actually ModLoader mods too in all but name:
+ * The demos themselves are actually LiteLoader mods too with a few adjustments:
  * they're located outside of the root package so that this class can load
  * them on demand.
  */
@@ -141,7 +141,7 @@ public class LiteModLibShapeDrawDemos implements Tickable, LSDEventListener {
                                 } catch (Exception e) {
                                     throw new RuntimeException("unable to instantiate demo mod " + demo.modClass, e);
                                 }
-                                demo.modInstance.load();
+                                demo.modInstance.init();
                                 if (demo.modInstance instanceof LSDEventListener) {
                                     ((LSDEventListener) demo.modInstance).onRespawn(savedFakeRespawnEvent);
                                 }

@@ -35,7 +35,7 @@ public class mod_LSDDemoBasicCheckInstall extends BaseMod {
     }
 
     @Override
-    public void load() {
+    public void init() {
         if (!isLibShapeDrawLoaded("0.1")) {
             // Gracefully handle the missing dependency: set a flag and exit
             // early before instantiating any LibShapeDraw classes.
@@ -50,7 +50,7 @@ public class mod_LSDDemoBasicCheckInstall extends BaseMod {
         }
 
         // One other worthwhile sanity check is to call the verifyInitialized()
-        // method, which ensures that ModLoader or Forge has successfully
+        // method, which ensures that LiteLoader or Forge has successfully
         // initialized LibShapeDraw. See the method's Javadoc for more details.
         LibShapeDraw libShapeDraw = new LibShapeDraw().verifyInitialized();
         WireframeCuboid box = new WireframeCuboid(2,63,0, 3,64,1);

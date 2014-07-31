@@ -59,7 +59,7 @@ public class mod_LSDDemoLogo extends BaseMod implements LSDEventListener {
     }
 
     @Override
-    public void load() {
+    public void init() {
         libShapeDraw = new LibShapeDraw()
         .verifyInitialized()
         .addEventListener(this)

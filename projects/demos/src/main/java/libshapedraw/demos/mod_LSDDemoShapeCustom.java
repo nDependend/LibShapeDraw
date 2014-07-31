@@ -71,7 +71,7 @@ public class mod_LSDDemoShapeCustom extends BaseMod {
     }
 
     @Override
-    public void load() {
+    public void init() {
         libShapeDraw = new LibShapeDraw().verifyInitialized();
 
         MyShape myShape = new MyShape(
