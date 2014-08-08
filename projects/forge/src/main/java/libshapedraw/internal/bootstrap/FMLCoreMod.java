@@ -1,4 +1,4 @@
-package libshapedraw.internal;
+package libshapedraw.internal.bootstrap;
 
 import java.util.Map;
 
@@ -37,12 +37,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
  * So many different ways to install a Minecraft mod... it's all a bit painful,
  * but it comes with the terrority.
  */
-public class ForgeCoreMod implements IFMLLoadingPlugin {
-    @Override
-    public String[] getLibraryRequestClass() {
-        return null;
-    }
-
+public class FMLCoreMod implements IFMLLoadingPlugin {
     @Override
     public String[] getASMTransformerClass() {
         return null;
@@ -61,5 +56,10 @@ public class ForgeCoreMod implements IFMLLoadingPlugin {
     @Override
     public void injectData(Map<String, Object> data) {
         // do nothing
+    }
+
+    @Override
+    public String getAccessTransformerClass() {
+        return null;
     }
 }

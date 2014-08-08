@@ -21,6 +21,9 @@ subprojects {
     ext.sharedManifest = manifest {
         attributes('Built-By': 'Gradle', 'Implementation-Title': project.property('libshapedraw.name'), 'Implementation-Vendor': project.property('libshapedraw.authors'), 'Implementation-Version': version)
     }
+    ext.coreModManifest = manifest {
+        attributes('FMLCorePlugin': 'libshapedraw.internal.bootstrap.FMLCoreMod', 'FMLCorePluginContainsFMLMod': 'true')
+    }
 
     repositories {
         maven {
@@ -212,6 +215,9 @@ project(':forge') {
     }
 
     jar {
+        manifest {
+            from coreModManifest
+        }
         extension = 'jar'
     }
 }
@@ -262,7 +268,7 @@ project(':LibShapeDraw') {
         })
 
         manifest {
-            from sharedManifest
+            from sharedManifest, coreModManifest
         }
 
         baseName = project.property('libshapedraw.name')
