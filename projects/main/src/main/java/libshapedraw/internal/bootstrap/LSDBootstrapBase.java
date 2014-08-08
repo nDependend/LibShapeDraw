@@ -143,7 +143,7 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
     // obf: Minecraft
     private Minecraft minecraft;
     // obf: Timer
-    protected Timer timer;
+    private Timer timer;
     private Proxy proxy;
     private LSDController controller;
     private boolean renderHeartbeat;

@@ -4,5 +4,6 @@
 	"version": "@libshapedraw.version@",
 	"revision": "@libshapedraw.revision@",
 	"author": "@libshapedraw.authors@",
-	"description": "@libshapedraw.blurb@"
+	"description": "@libshapedraw.blurb@",
+	"classTransformerClasses" : "libshapedraw.internal.bootstrap.LSDTransformer"
 }

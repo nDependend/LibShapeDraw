@@ -8,6 +8,8 @@ import libshapedraw.internal.LSDController;
 import com.mumfrey.liteloader.InitCompleteListener;
 import com.mumfrey.liteloader.JoinGameListener;
 import com.mumfrey.liteloader.core.LiteLoader;
+import com.mumfrey.liteloader.LiteMod;
+import com.mumfrey.liteloader.transformers.event.EventInfo;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.INetHandler;
@@ -51,12 +53,19 @@ public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitComplet
     public void onTick(Minecraft minecraft, float partialTicks, boolean inGame, boolean clock) {
         if (isDelegate) {
             if (inGame) {
-                // game ticks only, not every render frame.
-                for (int i = 0; i < timer.elapsedTicks; i++) {
-                    onGameTickBootstrap();
-                }
-
                 checkRenderHook();
+            }
+        }
+    }
+
+    public static void onGameTickEnd(EventInfo<Minecraft> e)
+    {
+        LiteModLibShapeDraw lsdMod = LiteLoader.getInstance().getMod(LiteModLibShapeDraw.class);
+        if (lsdMod.isDelegate) {
+            if ((e.getSource().theWorld != null) && (e.getSource().thePlayer != null)) {
+                // game ticks only, not every render frame.
+                LSDController.getLog().info("LiteLoader onGameTick");
+                lsdMod.onGameTickBootstrap();
             }
         }
     }
