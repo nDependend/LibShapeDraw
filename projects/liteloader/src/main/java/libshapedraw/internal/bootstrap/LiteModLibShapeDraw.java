@@ -60,7 +60,12 @@ public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitComplet
 
     public static void onGameTickEnd(EventInfo<Minecraft> e)
     {
-        LiteModLibShapeDraw lsdMod = LiteLoader.getInstance().getMod(LiteModLibShapeDraw.class);
+        LiteModLibShapeDraw lsdMod = null;
+        try {
+            lsdMod = LiteLoader.getInstance().getMod(LiteModLibShapeDraw.class.getSimpleName());
+        } catch (Exception error) {
+        }
+
         if (lsdMod.isDelegate) {
             if ((e.getSource().theWorld != null) && (e.getSource().thePlayer != null)) {
                 // game ticks only, not every render frame.
