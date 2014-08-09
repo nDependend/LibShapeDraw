@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
+import java.io.File;
 
 import libshapedraw.ApiInfo;
 import libshapedraw.MinecraftAccess;
@@ -39,7 +40,7 @@ import com.google.common.base.Throwables;
  * <p>
  * As a wrapper, all direct interaction with Minecraft objects passes through
  * this class, making the LibShapeDraw API itself clean and free of obfuscated
- * code. (There is a single exception: LSDModDirectory.getMinecraftDir.)
+ * code.
  */
 public abstract class LSDBootstrapBase implements MinecraftAccess {
     /**
@@ -333,6 +334,20 @@ public abstract class LSDBootstrapBase implements MinecraftAccess {
                 curPlayer.prevPosY + partialTick*(curPlayer.posY - curPlayer.prevPosY),
                 // obf: Entity.prevPosZ, Entity.posZ
                 curPlayer.prevPosZ + partialTick*(curPlayer.posZ - curPlayer.prevPosZ));
+    }
+
+    /**
+     * A utility method used by {@link libshapedraw.internal.LSDModDirectory}
+     * to keep the API clean of obfuscated code.
+     */
+    public static File getMinecraftDir() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc != null) {
+            return mc.mcDataDir;
+        } else {
+            // For the test suite, we return a temporary directory
+            return LSDUtil.createTempDirectory("");
+        }
     }
 
     // ====
