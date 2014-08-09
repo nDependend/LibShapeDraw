@@ -19,8 +19,6 @@ import libshapedraw.shape.Shape;
 
 import net.minecraft.launchwrapper.Launch;
 
-import com.google.common.base.Throwables;
-
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -66,7 +64,11 @@ public class LSDController {
                 ClassLoader classLoader = Launch.classLoader;
                 instance = (LSDController) Class.forName("libshapedraw.internal.LSDController", true, classLoader).newInstance();
             } catch (Exception ex) {
-                Throwables.propagate(ex);
+                // In the test suite, Launch.classLoader won't find the class
+                // We should never reach this point in normal usage though
+                // - print a stack trace so that this state is recognized as 'bad' by regular users
+                ex.printStackTrace();
+                instance = new LSDController();
             }
         }
         return instance;
