@@ -9,6 +9,12 @@ import com.mumfrey.liteloader.transformers.event.inject.MethodHead;
 
 import static libshapedraw.internal.bootstrap.LSDObfTable.*;
 
+/**
+ * Internal class.  This transformer injects a 20 tps callback at the same
+ * location as FML's post-client tick event, so that
+ * {@link libshapedraw.event.LSDGameTickEvent} will behave consistently across
+ * the two loaders.
+ */
 public class LSDTransformer extends EventInjectionTransformer
 {
 	@Override

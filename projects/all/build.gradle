@@ -282,6 +282,7 @@ project(':LibShapeDraw') {
     javadoc {
         source project(':liteloader').sourceSets.main.allJava
         source project(':forge').sourceSets.filtered.allJava
+        options.overview = new File("${project(':LibShapeDraw').projectDir}/src/main/javadoc/overview.html")
     }
 
     artifacts {

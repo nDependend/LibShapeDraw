@@ -31,7 +31,7 @@ import com.google.common.base.Throwables;
  * Internal class. Mods using the LibShapeDraw API can safely ignore this.
  * Rather, instantiate {@link libshapedraw.LibShapeDraw}.
  * <p>
- * This is a base bootstrapping class delegated by loaders to link itself
+ * This is a base bootstrapping class inherited by loaders to link itself
  * to the internal API Controller, providing it data and events from Minecraft.
  * This class does the bare minimum of processing before passing these off to
  * the controller. I.e., this class is a thin wrapper for Minecraft used by

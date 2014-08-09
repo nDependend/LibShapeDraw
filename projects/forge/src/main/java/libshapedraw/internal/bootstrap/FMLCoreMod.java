@@ -6,36 +6,36 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 /**
  * To provide compatibility with different install scenarios, this internal
- * class (coupled with an entry in the manifest; see pom.xml) marks
+ * class (coupled with an entry in the manifest; see build.gradle) marks
  * LibShapeDraw as an FML coremod.
  * <p>
  * FML coremods can do a number of things that regular FML mods cannot, such as
  * manipulating bytecode. We don't have any use for that feature, so this class
  * is just a dummy implementation.
  * <p>
- * The coremod feature we *do* need is the ability to be visible to other mods.
+ * Before the 1.6 vanilla launcher changes, the feature that we needed from
+ * coremods was the ability to be visible to other mods via the classpath.
  * Any jars/zips (a.k.a. mod containers) that FML finds in the "mods" directory
  * are loaded, but the mods inside are isolated from mods that live in other
  * containers.
  * <p>
- * Obviously, as an API we need to *not* be isolated.
+ * This technique is now obsolete thanks to the LaunchClassLoader alternative.
  * <p>
- * To break the isolation, the LibShapeDraw jar needs to live in FML's special
- * "coremods" directory. We also need to implement IFMLLoadingPlugin and add a
+ * The feature that we *do* need is to signal that this jar shouldn't be
+ * considered twice with respect to mod discovery.  Normally, this mod's jar
+ * would only be discovered in the "mods" directory, but LiteLoader's
+ * transformer will also inject the jar into the classpath, leading FML to
+ * discover the mod twice.  Including a coremod will signal to FML that this
+ * jar should also be ignored if it is found on the classpath, thereby avoiding
+ * duplicate detection.  We also need to implement IFMLLoadingPlugin and add a
  * FMLCorePlugin entry to the jar's manifest. We jump through those hoops to
- * support users who prefer to install their mods this way.
+ * support users who use both loaders at once.
  * <p>
- * Note that this class will never be loaded for non-FML (i.e., good
- * old-fashioned ModLoader) installs. ModLoader does not differentiate between
- * mods and coremods, and does not enforce classpath isolation. Placing the jar
- * in the "mods" directory works fine for ModLoader installation.
- * <p>
- * This class will also never be loaded, even when using FML, if the user opts
- * to patch LibShapeDraw into minecraft.jar directly, or if they're using a
- * launcher utility, which does its own classpath mangling magic.
- * <p>
- * So many different ways to install a Minecraft mod... it's all a bit painful,
- * but it comes with the terrority.
+ * This coremod will only remain included contingent upon LiteLoader providing
+ * a proper 20 tps callback, making
+ * {@link libshapedraw.internal.bootstrap.LSDTransformer} unnecessary.  Modders
+ * should therefore not expect its isolation-breaking capabilities to exist
+ * in future versions.
  */
 public class FMLCoreMod implements IFMLLoadingPlugin {
     @Override
