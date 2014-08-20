@@ -91,6 +91,10 @@ released along with Minecraft 1.5, with the following adjustments:
 
 ## Building LibShapeDraw from source
 
+**NB**: This section is pending a re-write since it is out-of-date due to a
+hybrid MCP/Gradle/ForgeGradle system that I employ; the theory is still
+applicable though.
+
 If you just want to use the API in your own mod, feel free to skip the rest of
 this file and use a prebuilt jar.
 
