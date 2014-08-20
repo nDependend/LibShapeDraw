@@ -285,8 +285,21 @@ project(':LibShapeDraw') {
         options.overview = new File("${project(':LibShapeDraw').projectDir}/src/main/javadoc/overview.html")
     }
 
+    task sourceJar(type: Jar) {
+        from project(':liteloader').sourceSets.main.allJava
+        from project(':forge').sourceSets.filtered.allJava
+        from sourceSets.main.allJava
+
+        manifest {
+            from sharedManifest
+        }
+
+        classifier = 'sources'
+    }
+
     artifacts {
         common libraryJar
+        archives sourceJar
     }
 
     tasks.build.dependsOn(reobfuscate)
