@@ -6,7 +6,7 @@ libshapedraw.animation.trident.ease
 libshapedraw.animation.trident.interpolator
 libshapedraw.event
 libshapedraw.internal
+libshapedraw.internal.bootstrap
 libshapedraw.primitive
 libshapedraw.shape
 libshapedraw.transform
-net.minecraft.src
