@@ -1,4 +1,8 @@
-## implemented but not yet released
+## 1.3.2
+- updated for Minecraft 1.7.10
+- added LiteLoader and Forge/FML controller delegates for bootstrapping
+  (packaged into one jar); ModLoader and jar-modding is no longer supported in
+  the Tweaks era
 - more granular profiling
 - added `ApiInfo.getModDirectory` and `LibShapeDraw.debugDump`
 
