@@ -69,7 +69,6 @@ public class LiteModLibShapeDraw extends LSDBootstrapBase implements InitComplet
         if (lsdMod.isDelegate) {
             if ((e.getSource().theWorld != null) && (e.getSource().thePlayer != null)) {
                 // game ticks only, not every render frame.
-                LSDController.getLog().info("LiteLoader onGameTick");
                 lsdMod.onGameTickBootstrap();
             }
         }
